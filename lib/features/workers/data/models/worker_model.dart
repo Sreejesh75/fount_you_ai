@@ -21,14 +21,14 @@ class WorkerModel {
 
   factory WorkerModel.fromJson(Map<String, dynamic> json) {
     return WorkerModel(
-      id: json['_id'] ?? '',
-      name: json['name'] ?? '',
-      photoUrl: json['photoUrl'] ?? '',
-      faceData: json['faceData'],
-      jobRole: json['jobRole'] ?? '',
-      place: json['place'] ?? '',
-      contactNumber: json['contactNumber'] ?? '',
-      dailyWage: (json['dailyWage'] ?? 0).toDouble(),
+      id: json['_id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      photoUrl: json['photoUrl']?.toString() ?? '',
+      faceData: json['faceData']?.toString(),
+      jobRole: json['jobRole']?.toString() ?? '',
+      place: json['place']?.toString() ?? '',
+      contactNumber: json['contactNumber']?.toString() ?? '',
+      dailyWage: double.tryParse(json['dailyWage']?.toString() ?? '0') ?? 0.0,
     );
   }
 

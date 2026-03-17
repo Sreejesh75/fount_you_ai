@@ -98,7 +98,10 @@ class _AuthPageState extends State<AuthPage> with SingleTickerProviderStateMixin
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => VerifyOtpPage(phoneNumber: state.phoneNumber),
+                    builder: (_) => VerifyOtpPage(
+                      phoneNumber: state.phoneNumber,
+                      otp: state.otp,
+                    ),
                   ),
                 );
               }

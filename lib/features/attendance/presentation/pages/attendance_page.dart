@@ -8,6 +8,7 @@ import '../../../../core/constants/color_constants.dart';
 import '../../../../features/workers/presentation/bloc/worker_bloc.dart';
 import '../../../../features/workers/presentation/bloc/worker_event.dart';
 import '../../../../features/workers/presentation/bloc/worker_state.dart';
+import '../../../../features/workers/data/models/worker_model.dart';
 import '../../data/models/attendance_model.dart';
 import '../bloc/attendance_bloc.dart';
 import '../bloc/attendance_event.dart';
@@ -33,6 +34,7 @@ class _AttendancePageState extends State<AttendancePage> {
   bool _isFaceDetected = false;
   bool _isRecognizing = false;
   AttendanceModel? _markedRecord;
+  WorkerModel? _matchedWorker;
 
   CameraDescription? _cameraDescription;
 
@@ -142,16 +144,26 @@ class _AttendancePageState extends State<AttendancePage> {
     if (!mounted) return;
 
     final workerState = context.read<WorkerBloc>().state;
-    if (workerState is WorkersLoadedSuccess && workerState.workers.isNotEmpty) {
-      // For Demo: We match the face to the first registered worker
-      final matchedWorker = workerState.workers.first;
-      context.read<AttendanceBloc>().add(MarkAttendanceEvent(matchedWorker.id));
+    if (workerState is WorkersLoadedSuccess) {
+      if (workerState.workers.isNotEmpty) {
+        // For Demo: We match the face to the first registered worker
+        _matchedWorker = workerState.workers.first;
+        context.read<AttendanceBloc>().add(MarkAttendanceEvent(_matchedWorker!.id));
+      } else {
+        setState(() {
+          _isRecognizing = false;
+          _status = "No workers registered";
+        });
+        await Future.delayed(const Duration(seconds: 2));
+        if (mounted) setState(() { _status = "Scan your face"; });
+      }
     } else {
+      // Still loading or error in worker fetch
       setState(() {
         _isRecognizing = false;
-        _status = "Access Denied: Unknown Face";
+        _status = "Database busy, try again";
       });
-      await Future.delayed(const Duration(seconds: 3));
+      await Future.delayed(const Duration(seconds: 1));
       if (mounted) setState(() { _status = "Scan your face"; });
     }
   }
@@ -167,6 +179,7 @@ class _AttendancePageState extends State<AttendancePage> {
   void _resetScanner() {
     setState(() {
       _markedRecord = null;
+      _matchedWorker = null;
       _isRecognizing = false;
       _isFaceDetected = false;
       _status = "Scan your face";
@@ -229,10 +242,10 @@ class _AttendancePageState extends State<AttendancePage> {
               child: AttendanceStatusPill(status: _status),
             ),
 
-            // Success View Overlay
-            if (_markedRecord != null)
+            if (_markedRecord != null && _matchedWorker != null)
               AttendanceSuccessView(
                 record: _markedRecord!,
+                worker: _matchedWorker!,
                 onReset: _resetScanner,
               ),
 

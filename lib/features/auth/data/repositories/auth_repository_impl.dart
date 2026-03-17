@@ -9,7 +9,7 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<String> requestOtp(String phoneNumber) {
+  Future<Map<String, dynamic>> requestOtp(String phoneNumber) {
     return remoteDataSource.requestOtp(phoneNumber);
   }
 

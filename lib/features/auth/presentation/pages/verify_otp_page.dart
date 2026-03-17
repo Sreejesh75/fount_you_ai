@@ -12,8 +12,9 @@ import '../bloc/auth_state.dart';
 
 class VerifyOtpPage extends StatefulWidget {
   final String phoneNumber;
+  final String? otp;
 
-  const VerifyOtpPage({super.key, required this.phoneNumber});
+  const VerifyOtpPage({super.key, required this.phoneNumber, this.otp});
 
   @override
   State<VerifyOtpPage> createState() => _VerifyOtpPageState();
@@ -22,6 +23,27 @@ class VerifyOtpPage extends StatefulWidget {
 class _VerifyOtpPageState extends State<VerifyOtpPage> {
   final _otpController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.otp != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'OTP sent successfully! Your code is: ${widget.otp}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: Colors.green.shade600,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 5),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      });
+    }
+  }
 
   @override
   void dispose() {

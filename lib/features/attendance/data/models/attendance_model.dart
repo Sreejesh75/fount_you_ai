@@ -14,12 +14,23 @@ class AttendanceModel {
   });
 
   factory AttendanceModel.fromJson(Map<String, dynamic> json) {
+    // Handle cases where workerId is an object or just a string
+    String? wName = json['workerName'];
+    String wId = '';
+    
+    if (json['workerId'] is Map) {
+      wId = json['workerId']['_id'] ?? '';
+      wName ??= json['workerId']['name'];
+    } else {
+      wId = json['workerId']?.toString() ?? '';
+    }
+
     return AttendanceModel(
       id: json['_id'] ?? '',
-      workerId: json['workerId']?['_id'] ?? json['workerId'] ?? '',
+      workerId: wId,
       date: json['date'] ?? '',
       time: json['time'] ?? '',
-      workerName: json['workerName'] ?? json['workerId']?['name'],
+      workerName: wName,
     );
   }
 

@@ -5,7 +5,7 @@ import '../models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<String> requestOtp(String phoneNumber);
+  Future<Map<String, dynamic>> requestOtp(String phoneNumber);
   Future<UserModel> verifyAndSetPassword(String phoneNumber, String otp, String password);
   Future<UserModel> login(String phoneNumber, String password);
   Future<void> logout();
@@ -17,14 +17,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl({required this.dioClient});
 
   @override
-  Future<String> requestOtp(String phoneNumber) async {
+  Future<Map<String, dynamic>> requestOtp(String phoneNumber) async {
     try {
       final response = await dioClient.dio.post(
         ApiConstants.requestOtp,
         data: {'phoneNumber': phoneNumber},
       );
-      // Backend returns {"message": "OTP sent successfully", "otpForTesting": "..."}
-      return response.data['message'] ?? 'OTP Requested';
+      return response.data;
     } on DioException catch (e) {
       throw Exception(e.response?.data?['message'] ?? 'Failed to request OTP');
     }

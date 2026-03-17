@@ -21,13 +21,25 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
         data: {'workerId': workerId},
       );
 
-      if (response.statusCode == 201) {
-        final recordJson = Map<String, dynamic>.from(response.data['record']);
-        // Add workerName from top level to the record map for parsing
-        recordJson['workerName'] = response.data['workerName'];
-        return AttendanceModel.fromJson(recordJson);
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final dynamic data = response.data;
+        
+        if (data is Map) {
+          final mapData = Map<String, dynamic>.from(data);
+          if (mapData.containsKey('record')) {
+            final recordJson = Map<String, dynamic>.from(mapData['record']);
+            recordJson['workerName'] ??= mapData['workerName'];
+            return AttendanceModel.fromJson(recordJson);
+          }
+          return AttendanceModel.fromJson(mapData);
+        } else if (data is List && data.isNotEmpty) {
+          // If server returns a list, use the first item
+          return AttendanceModel.fromJson(Map<String, dynamic>.from(data.first));
+        } else {
+          throw 'Server returned an invalid format for attendance record';
+        }
       } else {
-        final errorMessage = response.data?['message'] ?? 'Failed to mark attendance';
+        final errorMessage = response.data is Map ? (response.data?['message'] ?? 'Failed to mark attendance') : 'Server error: ${response.statusCode}';
         throw errorMessage;
       }
     } on DioException catch (e) {
@@ -47,9 +59,15 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
       );
 
       if (response.statusCode == 200) {
-        return List<Map<String, dynamic>>.from(response.data['details']);
+        final dynamic data = response.data;
+        if (data is List) {
+          return List<Map<String, dynamic>>.from(data);
+        } else if (data is Map && data.containsKey('details')) {
+          return List<Map<String, dynamic>>.from(data['details']);
+        }
+        return [];
       } else {
-        throw response.data?['message'] ?? 'Failed to fetch report';
+        throw response.data is Map ? (response.data?['message'] ?? 'Failed to fetch report') : 'Server error';
       }
     } catch (e) {
       rethrow;
