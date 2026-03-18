@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../data/models/user_model.dart';
 
 abstract class AuthEvent extends Equatable {
   const AuthEvent();
@@ -44,3 +45,12 @@ class LoginEvent extends AuthEvent {
 class CheckAuthStatusEvent extends AuthEvent {}
 
 class LogoutEvent extends AuthEvent {}
+
+class AuthUserUpdatedEvent extends AuthEvent {
+  final UserModel user;
+
+  const AuthUserUpdatedEvent(this.user);
+
+  @override
+  List<Object?> get props => [user];
+}

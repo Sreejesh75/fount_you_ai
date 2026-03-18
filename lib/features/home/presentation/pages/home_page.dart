@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../../core/constants/color_constants.dart';
-import '../../../../core/widgets/primary_button.dart';
-import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../../../auth/presentation/bloc/auth_event.dart';
-import '../../../attendance/presentation/pages/attendance_page.dart';
-import '../../../attendance/presentation/pages/attendance_report_page.dart';
-import '../../../workers/presentation/pages/register_worker_page.dart';
-import '../../../workers/presentation/pages/worker_list_page.dart';
+import 'package:found_you_ai/core/constants/color_constants.dart';
+import 'package:found_you_ai/core/widgets/primary_button.dart';
+import 'package:found_you_ai/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:found_you_ai/features/auth/presentation/bloc/auth_event.dart';
+import 'package:found_you_ai/features/auth/presentation/bloc/auth_state.dart';
+import 'package:found_you_ai/features/attendance/presentation/pages/attendance_page.dart';
+import 'package:found_you_ai/features/attendance/presentation/pages/attendance_report_page.dart';
+import 'package:found_you_ai/features/workers/presentation/pages/register_worker_page.dart';
+import 'package:found_you_ai/features/workers/presentation/pages/worker_list_page.dart';
+
+import 'package:found_you_ai/features/auth/presentation/pages/profile_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -42,16 +45,25 @@ class HomePage extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      IconButton(
+                        icon: const Icon(Icons.person_pin_rounded, color: AppColors.accentYellow, size: 28),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const ProfilePage()),
+                          );
+                        },
+                      ),
                       Text(
                         'FOUND YOU',
                         style: GoogleFonts.syne(
-                          fontSize: 24,
+                          fontSize: 22,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.logout_rounded, color: AppColors.accentYellow),
+                        icon: const Icon(Icons.logout_rounded, color: Colors.white38),
                         onPressed: () {
                           context.read<AuthBloc>().add(LogoutEvent());
                         },
@@ -82,27 +94,50 @@ class HomePage extends StatelessWidget {
                 
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Welcome, Supervisor',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.outfit(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Ready to mark attendance for today?',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          color: Colors.white.withValues(alpha: 0.4),
-                        ),
-                      ),
-                    ],
+                  child: BlocBuilder<AuthBloc, AuthState>(
+                    builder: (context, state) {
+                      String name = 'Admin';
+                      String role = 'Supervisor';
+                      
+                      if (state is AuthAuthenticated) {
+                        name = state.user?.name ?? 'Admin';
+                        role = state.user?.role ?? 'Supervisor';
+                      }
+                      
+                      return Column(
+                        children: [
+                          Text(
+                            'Welcome, $name',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.outfit(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Authorized $role',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.accentYellow.withValues(alpha: 0.8),
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Ready to mark attendance for today?',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: Colors.white.withValues(alpha: 0.4),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
                 

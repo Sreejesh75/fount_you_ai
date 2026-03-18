@@ -29,6 +29,21 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<UserModel> getProfile() {
+    return remoteDataSource.getProfile();
+  }
+
+  @override
+  Future<UserModel> updateProfile({String? name, String? role}) {
+    return remoteDataSource.updateProfile(name: name, role: role);
+  }
+
+  @override
+  Future<void> deleteAccount() {
+    return remoteDataSource.deleteAccount();
+  }
+
+  @override
   Future<bool> isLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.containsKey('token');

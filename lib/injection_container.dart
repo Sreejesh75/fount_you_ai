@@ -8,6 +8,7 @@ import 'features/attendance/data/repositories/attendance_repository_impl.dart';
 import 'features/attendance/domain/repositories/attendance_repository.dart';
 import 'features/attendance/presentation/bloc/attendance_bloc.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/auth/presentation/bloc/profile_bloc.dart';
 import 'features/workers/data/datasources/worker_remote_data_source.dart';
 import 'features/workers/data/repositories/worker_repository_impl.dart';
 import 'features/workers/domain/repositories/worker_repository.dart';
@@ -18,6 +19,7 @@ final sl = GetIt.instance;
 void init() {
   // BLoC
   sl.registerFactory(() => AuthBloc(authRepository: sl()));
+  sl.registerFactory(() => ProfileBloc(authRepository: sl()));
   sl.registerFactory(() => WorkerBloc(repository: sl()));
   sl.registerFactory(() => AttendanceBloc(repository: sl()));
 

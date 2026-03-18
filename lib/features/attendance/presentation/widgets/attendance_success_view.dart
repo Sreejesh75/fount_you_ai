@@ -146,6 +146,8 @@ class _AttendanceSuccessViewState extends State<AttendanceSuccessView> with Sing
                         children: [
                           _buildDetailItem('Time', widget.record.time, Icons.access_time_rounded),
                           Container(width: 1, height: 30, color: Colors.white10),
+                          _buildDetailItem('Wages', '₹${widget.worker.dailyWage.toStringAsFixed(0)}', Icons.payments_rounded),
+                          Container(width: 1, height: 30, color: Colors.white10),
                           _buildDetailItem('Status', 'Present', Icons.person_pin_rounded),
                         ],
                       ),

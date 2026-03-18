@@ -12,13 +12,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<VerifyOtpAndSetPasswordEvent>(_onVerifyOtpAndSetPassword);
     on<LoginEvent>(_onLogin);
     on<LogoutEvent>(_onLogout);
+    on<AuthUserUpdatedEvent>((event, emit) => emit(AuthAuthenticated(user: event.user)));
   }
 
   Future<void> _onCheckAuthStatus(CheckAuthStatusEvent event, Emitter<AuthState> emit) async {
     try {
       final isLoggedIn = await authRepository.isLoggedIn();
       if (isLoggedIn) {
-        emit(const AuthAuthenticated());
+        final user = await authRepository.getProfile();
+        emit(AuthAuthenticated(user: user));
       } else {
         emit(AuthUnauthenticated());
       }

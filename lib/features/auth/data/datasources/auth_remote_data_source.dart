@@ -8,6 +8,9 @@ abstract class AuthRemoteDataSource {
   Future<Map<String, dynamic>> requestOtp(String phoneNumber);
   Future<UserModel> verifyAndSetPassword(String phoneNumber, String otp, String password);
   Future<UserModel> login(String phoneNumber, String password);
+  Future<UserModel> getProfile();
+  Future<UserModel> updateProfile({String? name, String? role});
+  Future<void> deleteAccount();
   Future<void> logout();
 }
 
@@ -73,6 +76,43 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       return UserModel.fromJson(response.data['user']);
     } on DioException catch (e) {
       throw Exception(e.response?.data?['message'] ?? 'Failed to login');
+    }
+  }
+
+  @override
+  Future<UserModel> getProfile() async {
+    try {
+      final response = await dioClient.dio.get(ApiConstants.profile);
+      return UserModel.fromJson(response.data);
+    } on DioException catch (e) {
+      throw Exception(e.response?.data?['message'] ?? 'Failed to fetch profile');
+    }
+  }
+
+  @override
+  Future<UserModel> updateProfile({String? name, String? role}) async {
+    try {
+      final response = await dioClient.dio.put(
+        ApiConstants.profile,
+        data: {
+          if (name != null) 'name': name,
+          if (role != null) 'role': role,
+        },
+      );
+      // Backend returns { message, user }
+      return UserModel.fromJson(response.data['user']);
+    } on DioException catch (e) {
+      throw Exception(e.response?.data?['message'] ?? 'Failed to update profile');
+    }
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    try {
+      await dioClient.dio.delete(ApiConstants.profile);
+      await logout();
+    } on DioException catch (e) {
+      throw Exception(e.response?.data?['message'] ?? 'Failed to delete account');
     }
   }
 
