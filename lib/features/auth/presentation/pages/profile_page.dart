@@ -63,172 +63,16 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: AppColors.deepNavy,
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'PROFILE',
-          style: GoogleFonts.syne(
-            fontWeight: FontWeight.w800,
-            fontSize: 18,
-            letterSpacing: 2,
-            color: Colors.white,
-          ),
-        ),
-        centerTitle: true,
-      ),
+      appBar: _buildAppBar(context),
       body: BlocConsumer<ProfileBloc, ProfileState>(
-        listener: (context, state) {
-          if (state is ProfileError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-            );
-          }
-          if (state is ProfileUpdateSuccess) {
-            setState(() => _isEditing = false);
-            // Notify AuthBloc about the update to refresh HomePage
-            context.read<AuthBloc>().add(AuthUserUpdatedEvent(state.user));
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.green),
-            );
-          }
-          if (state is AccountDeletedSuccess) {
-            context.read<AuthBloc>().add(LogoutEvent());
-            Navigator.of(context).popUntil((route) => route.isFirst);
-          }
-        },
+        listener: _handleStateChanges,
         builder: (context, state) {
-          if (state is ProfileLoaded) {
-            _setupControllers(state);
-          }
+          if (state is ProfileLoaded) _setupControllers(state);
           
           return Stack(
             children: [
-              // Background Circles
-              Positioned(
-                top: -100,
-                left: -100,
-                child: Container(
-                  width: 300,
-                  height: 300,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.primaryNavy.withValues(alpha: 0.1),
-                  ),
-                ),
-              ),
-              
-              SafeArea(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 20),
-                      // Avatar placeholder
-                      Center(
-                        child: Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.accentYellow, width: 3),
-                            color: Colors.white.withValues(alpha: 0.05),
-                          ),
-                          child: const Icon(
-                            Icons.person_rounded,
-                            size: 60,
-                            color: AppColors.accentYellow,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                      
-                      GlassCard(
-                        padding: const EdgeInsets.all(24),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Personal Information',
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: Icon(
-                                    _isEditing ? Icons.close_rounded : Icons.edit_rounded,
-                                    color: AppColors.accentYellow,
-                                    size: 20,
-                                  ),
-                                  onPressed: () {
-                                    setState(() => _isEditing = !_isEditing);
-                                  },
-                                ),
-                              ],
-                            ),
-                            const Divider(color: Colors.white10, height: 32),
-                            
-                            _buildInfoField('FULL NAME', _nameController, editable: _isEditing),
-                            const SizedBox(height: 24),
-                            
-                            _buildRoleDropdown('YOUR ROLE', editable: _isEditing),
-                            const SizedBox(height: 24),
-                            
-                            _buildStaticField('PHONE NUMBER', 
-                              state is ProfileLoaded ? state.user.phoneNumber : 'Loading...'
-                            ),
-                            
-                            if (_isEditing) ...[
-                              const SizedBox(height: 40),
-                              PrimaryButton(
-                                text: 'SAVE CHANGES',
-                                onPressed: () {
-                                  context.read<ProfileBloc>().add(UpdateProfileEvent(
-                                    name: _nameController.text,
-                                    role: _selectedRole,
-                                  ));
-                                },
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 48),
-                      
-                      // Secondary Actions
-                      TextButton.icon(
-                        onPressed: () => _showDeleteDialog(context),
-                        icon: const Icon(Icons.delete_forever_rounded, color: Colors.redAccent, size: 18),
-                        label: Text(
-                          'DELETE ACCOUNT',
-                          style: GoogleFonts.inter(
-                            color: Colors.redAccent,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1.2,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                      
-                      if (state is ProfileLoading)
-                        const Padding(
-                          padding: EdgeInsets.only(top: 20),
-                          child: CircularProgressIndicator(color: AppColors.accentYellow),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
+              _buildBackgroundDecor(),
+              _buildMainContent(state),
             ],
           );
         },
@@ -236,38 +80,202 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  // --- UI Components ---
+
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+        onPressed: () => Navigator.pop(context),
+      ),
+      title: Text(
+        'PROFILE',
+        style: GoogleFonts.syne(
+          fontWeight: FontWeight.w800,
+          fontSize: 18,
+          letterSpacing: 2,
+          color: Colors.white,
+        ),
+      ),
+      centerTitle: true,
+    );
+  }
+
+  Widget _buildBackgroundDecor() {
+    return Positioned(
+      top: -100,
+      left: -100,
+      child: Container(
+        width: 300,
+        height: 300,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: AppColors.primaryNavy.withValues(alpha: 0.1),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainContent(ProfileState state) {
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+            _buildProfileAvatar(),
+            const SizedBox(height: 32),
+            _buildInfoCard(state),
+            const SizedBox(height: 48),
+            _buildActionButtons(state),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileAvatar() {
+    return Center(
+      child: Container(
+        width: 120,
+        height: 120,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.accentYellow, width: 3),
+          color: Colors.white.withValues(alpha: 0.05),
+        ),
+        child: const Icon(
+          Icons.person_rounded,
+          size: 60,
+          color: AppColors.accentYellow,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(ProfileState state) {
+    return GlassCard(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildCardHeader(),
+          const Divider(color: Colors.white10, height: 32),
+          _buildInfoField('FULL NAME', _nameController, editable: _isEditing),
+          const SizedBox(height: 24),
+          _buildRoleDropdown('YOUR ROLE', editable: _isEditing),
+          const SizedBox(height: 24),
+          _buildStaticField('PHONE NUMBER', 
+            state is ProfileLoaded ? state.user.phoneNumber : 'Loading...'
+          ),
+          if (_isEditing) ...[
+            const SizedBox(height: 40),
+            PrimaryButton(
+              text: 'SAVE CHANGES',
+              onPressed: _saveProfileChanges,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCardHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Personal Information',
+          style: GoogleFonts.outfit(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+        IconButton(
+          icon: Icon(
+            _isEditing ? Icons.close_rounded : Icons.edit_rounded,
+            color: AppColors.accentYellow,
+            size: 20,
+          ),
+          onPressed: () => setState(() => _isEditing = !_isEditing),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons(ProfileState state) {
+    return Column(
+      children: [
+        TextButton.icon(
+          onPressed: () => _showDeleteDialog(context),
+          icon: const Icon(Icons.delete_forever_rounded, color: Colors.redAccent, size: 18),
+          label: Text(
+            'DELETE ACCOUNT',
+            style: GoogleFonts.inter(
+              color: Colors.redAccent,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.2,
+              fontSize: 12,
+            ),
+          ),
+        ),
+        if (state is ProfileLoading)
+          const Padding(
+            padding: EdgeInsets.only(top: 20),
+            child: CircularProgressIndicator(color: AppColors.accentYellow),
+          ),
+      ],
+    );
+  }
+
+  // --- Logic & Helpers ---
+
+  void _handleStateChanges(BuildContext context, ProfileState state) {
+    if (state is ProfileError) {
+      _showSnackBar(state.message, Colors.red);
+    }
+    if (state is ProfileUpdateSuccess) {
+      setState(() => _isEditing = false);
+      context.read<AuthBloc>().add(AuthUserUpdatedEvent(state.user));
+      _showSnackBar(state.message, Colors.green);
+    }
+    if (state is AccountDeletedSuccess) {
+      context.read<AuthBloc>().add(LogoutEvent());
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
+  }
+
+  void _saveProfileChanges() {
+    context.read<ProfileBloc>().add(UpdateProfileEvent(
+      name: _nameController.text,
+      role: _selectedRole,
+    ));
+  }
+
+  void _showSnackBar(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: color),
+    );
+  }
+
   Widget _buildInfoField(String label, TextEditingController controller, {required bool editable}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            color: Colors.white38,
-            letterSpacing: 1.5,
-          ),
-        ),
+        _buildFieldLabel(label),
         const SizedBox(height: 8),
         editable 
           ? TextField(
               controller: controller,
               style: GoogleFonts.outfit(color: Colors.white, fontSize: 16),
-              decoration: InputDecoration(
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-                focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppColors.accentYellow)),
-              ),
+              decoration: _inputDecoration(),
             )
           : Text(
               controller.text,
-              style: GoogleFonts.outfit(
-                color: Colors.white,
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-              ),
+              style: GoogleFonts.outfit(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w600),
             ),
       ],
     );
@@ -277,37 +285,20 @@ class _ProfilePageState extends State<ProfilePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            color: Colors.white38,
-            letterSpacing: 1.5,
-          ),
-        ),
+        _buildFieldLabel(label),
         const SizedBox(height: 8),
         editable 
           ? DropdownButtonFormField<String>(
               value: _selectedRole,
               dropdownColor: AppColors.primaryNavy,
               style: GoogleFonts.outfit(color: Colors.white, fontSize: 16),
-              decoration: const InputDecoration(
-                isDense: true,
-                contentPadding: EdgeInsets.zero,
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.accentYellow)),
-              ),
+              decoration: _inputDecoration(isDense: true),
               items: _roles.map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(),
               onChanged: (val) => setState(() => _selectedRole = val),
             )
           : Text(
               _selectedRole ?? 'Admin',
-              style: GoogleFonts.outfit(
-                color: Colors.white,
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-              ),
+              style: GoogleFonts.outfit(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w600),
             ),
       ],
     );
@@ -317,25 +308,34 @@ class _ProfilePageState extends State<ProfilePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            color: Colors.white38,
-            letterSpacing: 1.5,
-          ),
-        ),
+        _buildFieldLabel(label),
         const SizedBox(height: 8),
         Text(
           value,
-          style: GoogleFonts.outfit(
-            color: Colors.white,
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
-          ),
+          style: GoogleFonts.outfit(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w600),
         ),
       ],
+    );
+  }
+
+  Widget _buildFieldLabel(String label) {
+    return Text(
+      label,
+      style: GoogleFonts.inter(
+        fontSize: 11,
+        fontWeight: FontWeight.w800,
+        color: Colors.white38,
+        letterSpacing: 1.5,
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration({bool isDense = false}) {
+    return InputDecoration(
+      isDense: true,
+      contentPadding: isDense ? EdgeInsets.zero : const EdgeInsets.symmetric(vertical: 8),
+      enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
+      focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppColors.accentYellow)),
     );
   }
 
