@@ -90,6 +90,8 @@ class _ProfilePageState extends State<ProfilePage> {
           }
           if (state is ProfileUpdateSuccess) {
             setState(() => _isEditing = false);
+            // Notify AuthBloc about the update to refresh HomePage
+            context.read<AuthBloc>().add(AuthUserUpdatedEvent(state.user));
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message), backgroundColor: Colors.green),
             );
