@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/network/dio_client.dart';
 import 'features/auth/data/datasources/auth_remote_data_source.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
@@ -16,7 +17,11 @@ import 'features/workers/presentation/bloc/worker_bloc.dart';
 
 final sl = GetIt.instance;
 
-void init() {
+Future<void> init() async {
+  // External
+  final sharedPreferences = await SharedPreferences.getInstance();
+  sl.registerLazySingleton(() => sharedPreferences);
+
   // BLoC
   sl.registerFactory(() => AuthBloc(authRepository: sl()));
   sl.registerFactory(() => ProfileBloc(authRepository: sl()));
