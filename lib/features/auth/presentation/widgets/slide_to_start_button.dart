@@ -58,20 +58,40 @@ class _SlideToStartButtonState extends State<SlideToStartButton> with SingleTick
               width: buttonWidth,
               height: buttonHeight,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(buttonHeight / 2),
-                border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+                border: Border.all(color: AppColors.electricBlue.withOpacity(0.3), width: 1.5),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
+                    color: AppColors.electricBlue.withOpacity(0.1),
+                    blurRadius: 15,
                     spreadRadius: 2,
                   ),
                 ],
               ),
               child: Stack(
                 children: [
-                  // Shimmer-like track effect can go here, but keeping it clean
+                  // Progressive track fill gradient
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: _dragValue + thumbSize,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.deepCyan.withOpacity(0.1),
+                            AppColors.electricBlue.withOpacity(0.3),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(buttonHeight / 2),
+                          bottomLeft: Radius.circular(buttonHeight / 2),
+                        ),
+                      ),
+                    ),
+                  ),
                   Center(
                     child: Opacity(
                       opacity: (1.0 - (_dragValue / (maxDragDistance * 0.5))).clamp(0.0, 1.0),
@@ -81,7 +101,7 @@ class _SlideToStartButtonState extends State<SlideToStartButton> with SingleTick
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          letterSpacing: 0.8,
+                          letterSpacing: 1.2,
                         ),
                       ),
                     ),
@@ -137,23 +157,23 @@ class _SlideToStartButtonState extends State<SlideToStartButton> with SingleTick
       height: size,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [AppColors.accentYellow, AppColors.premiumGold],
+          colors: [AppColors.electricBlue, AppColors.glowCyan],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: AppColors.accentYellow.withOpacity(0.5),
+            color: AppColors.electricBlue.withOpacity(0.6),
             blurRadius: 15,
             spreadRadius: 2,
           ),
         ],
       ),
       child: const Icon(
-        Icons.arrow_forward_ios_rounded,
-        color: AppColors.primaryNavy,
-        size: 24,
+        Icons.chevron_right_rounded,
+        color: Colors.white,
+        size: 32,
       ),
     );
   }

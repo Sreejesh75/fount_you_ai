@@ -9,6 +9,11 @@ class AppColors {
   static const Color accentYellow = Color(0xFFFBCF84);
   static const Color premiumGold = Color(0xFFDDB26A);
   
+  // Electric theme colors for the AI feel
+  static const Color electricBlue = Color(0xFF00D4FF);
+  static const Color deepCyan = Color(0xFF009CBF);
+  static const Color glowCyan = Color(0xFF00FFD1);
+  
   // Backgrounds
   static const Color lightBlueBackground = Color(0xFFF4F9FF);
   static const Color white = Colors.white;

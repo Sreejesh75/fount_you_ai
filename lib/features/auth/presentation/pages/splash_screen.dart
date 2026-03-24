@@ -27,7 +27,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       duration: const Duration(seconds: 15),
     )..repeat(reverse: true);
     
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.08).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
@@ -52,15 +52,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Animated Background (Ken Burns effect)
+          // Animated Background (Subtle Ken Burns effect)
           ScaleTransition(
             scale: _scaleAnimation,
             child: Image.asset(
               'assets/images/splashscreen.png',
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
+              alignment: Alignment.center,
               errorBuilder: (context, error, stackTrace) {
                 return Container(
                   decoration: const BoxDecoration(
@@ -77,19 +79,21 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             ),
           ),
           
-          // Enhanced Overlay - Professional Dark Gradient
+          // Enhanced Overlay - Professional Multi-stop Gradient
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withOpacity(0.1),
+                  Colors.black.withOpacity(0.4),
                   Colors.transparent,
-                  Colors.black.withOpacity(0.5),
-                  Colors.black.withOpacity(0.9),
+                  Colors.transparent,
+                  Colors.black.withOpacity(0.2),
+                  Colors.black.withOpacity(0.8),
+                  Colors.black,
                 ],
-                stops: const [0.0, 0.4, 0.7, 1.0],
+                stops: const [0.0, 0.2, 0.5, 0.7, 0.9, 1.0],
               ),
             ),
           ),
@@ -97,7 +101,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           // Content
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 64.0),
+              padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 48.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
