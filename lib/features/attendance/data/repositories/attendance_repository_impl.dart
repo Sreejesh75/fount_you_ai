@@ -16,4 +16,9 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
   Future<List<Map<String, dynamic>>> getAttendanceReport(String date) async {
     return await remoteDataSource.getAttendanceReport(date);
   }
+
+  @override
+  Future<Map<String, dynamic>> getAttendanceSummary() async {
+    return await remoteDataSource.getDashboardSummary();
+  }
 }

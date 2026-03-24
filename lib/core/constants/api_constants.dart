@@ -11,6 +11,7 @@ class ApiConstants {
   // Attendance Endpoints
   static const String markAttendance = '/api/attendance';
   static const String getReport = '/api/attendance/report';
+  static const String getSummary = '/api/attendance/summary';
 
   // Worker Endpoints
   static const String workers = '/api/workers';

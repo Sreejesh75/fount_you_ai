@@ -6,12 +6,28 @@ import '../models/attendance_model.dart';
 abstract class AttendanceRemoteDataSource {
   Future<AttendanceModel> markAttendance(String workerId);
   Future<List<Map<String, dynamic>>> getAttendanceReport(String date);
+  Future<Map<String, dynamic>> getDashboardSummary();
 }
 
 class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
   final DioClient dioClient;
 
   AttendanceRemoteDataSourceImpl({required this.dioClient});
+
+  @override
+  Future<Map<String, dynamic>> getDashboardSummary() async {
+    try {
+      final response = await dioClient.dio.get(ApiConstants.getSummary);
+
+      if (response.statusCode == 200) {
+        return Map<String, dynamic>.from(response.data);
+      } else {
+        throw response.data is Map ? (response.data?['message'] ?? 'Failed to fetch summary') : 'Server error';
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 
   @override
   Future<AttendanceModel> markAttendance(String workerId) async {

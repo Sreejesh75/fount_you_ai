@@ -22,3 +22,6 @@ class FetchAttendanceReportEvent extends AttendanceEvent {
   @override
   List<Object?> get props => [date];
 }
+class FetchDashboardSummaryEvent extends AttendanceEvent {
+  const FetchDashboardSummaryEvent();
+}

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../data/models/attendance_model.dart';
+import '../../data/models/dashboard_summary_model.dart';
 
 abstract class AttendanceState extends Equatable {
   const AttendanceState();
@@ -18,6 +19,14 @@ class AttendanceSuccess extends AttendanceState {
 
   @override
   List<Object?> get props => [record];
+}
+
+class AttendanceSummaryLoaded extends AttendanceState {
+  final DashboardSummaryModel summary;
+  const AttendanceSummaryLoaded(this.summary);
+
+  @override
+  List<Object?> get props => [summary];
 }
 
 class AttendanceReportLoaded extends AttendanceState {
